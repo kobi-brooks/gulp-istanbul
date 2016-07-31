@@ -56,7 +56,12 @@ var plugin = module.exports = function (opts) {
     var appData = {};
     appData.branchName = config.branch;
     appData.buildName = config.build;
-    appData.appName = config.appName;
+    if (opts.appName) {
+      appData.appName = opts.appName;
+      readConfigFileAndUpdateAppName(opts.appName)
+    }
+    else
+      appData.appName = config.appName;
 
     var metaData = {};
     metaData.appData = appData;
@@ -210,7 +215,14 @@ plugin.build = function (options) {
   var buildArguments = {};
   buildArguments.branch = config.branch;
   buildArguments.build = config.build;
-  buildArguments.appname = config.appName;
+
+  if (options.appName) {
+    buildArguments.appname = options.appName;
+    readConfigFileAndUpdateAppName(options.appName)
+  }
+  else
+    buildArguments.appname = config.appName;
+
   buildArguments.workspacepath = '.';
   buildArguments.scm = 'git';
   buildArguments.technology = 'nodejs';
@@ -251,6 +263,16 @@ function readConfigFileAndUpdateBuild(){
   config = JSON.parse((config));
 
   config.build = Date.now().toString();
+  fs.writeFileSync(SEALIGHTS_JSON_FILENAME, JSON.stringify(config));
+
+  return config;
+}
+
+function readConfigFileAndUpdateAppName(appName){
+  var config = fs.readFileSync(SEALIGHTS_JSON_FILENAME);
+  config = JSON.parse((config));
+
+  config.appName = appName;
   fs.writeFileSync(SEALIGHTS_JSON_FILENAME, JSON.stringify(config));
 
   return config;
